@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPi Homelab Configurator</title>
+<style>
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#242d42;
+  --border:#2a3245;--border2:#3a4560;--border3:#4a5575;
+  --text:#e8edf5;--text2:#8b97b0;--text3:#5a6680;
+  --accent:#4f8ef7;--accent-bg:rgba(79,142,247,.10);--accent-border:rgba(79,142,247,.35);
+  --green:#3ecf8e;--green-bg:rgba(62,207,142,.12);--green-border:rgba(62,207,142,.3);
+  --orange:#f7a84f;--orange-bg:rgba(247,168,79,.12);
+  --red:#f75f5f;--red-bg:rgba(247,95,95,.12);--red-border:rgba(247,95,95,.3);
+  --purple:#a78bfa;--purple-bg:rgba(167,139,250,.12);
+  --yellow:#f5d547;--yellow-bg:rgba(245,213,71,.12);
+  --r:8px;--rl:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'SF Mono','Cascadia Code','Fira Code',monospace;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+
+/* ── SHELL ── */
+.shell{display:grid;grid-template-columns:260px 1fr;grid-template-rows:56px 1fr;grid-template-areas:"hd hd" "sb mn";min-height:100vh}
+
+/* ── HEADER ── */
+header{grid-area:hd;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px;background:var(--bg);position:sticky;top:0;z-index:200}
+.logo{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;letter-spacing:-.3px;color:var(--text);white-space:nowrap}
+.logo-icon{width:26px;height:26px;background:linear-gradient(135deg,#c84b31,#e07b54);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.h-mid{flex:1}
+.h-stats{display:flex;gap:14px;align-items:center}
+.hstat{display:flex;flex-direction:column;align-items:flex-end}
+.hstat-v{font-size:13px;font-weight:700}
+.hstat-l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+.ram-pill{display:flex;align-items:center;gap:7px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:3px 11px;font-size:11px;white-space:nowrap}
+.ram-track{width:72px;height:5px;background:var(--border2);border-radius:3px;overflow:hidden}
+.ram-fill{height:100%;border-radius:3px;transition:width .4s ease,background .3s;background:var(--green)}
+.h-nav{display:flex;gap:2px}
+.h-tab{padding:6px 12px;font-family:inherit;font-size:12px;font-weight:600;color:var(--text2);background:none;border:none;border-radius:var(--r);cursor:pointer;transition:all .15s;white-space:nowrap}
+.h-tab:hover{color:var(--text);background:var(--bg2)}
+.h-tab.active{color:var(--accent);background:var(--accent-bg)}
+.gen-btn{padding:7px 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;white-space:nowrap}
+.gen-btn:hover{opacity:.85}
+.gen-btn:active{transform:scale(.97)}
+.gen-btn:disabled{opacity:.3;cursor:default;transform:none}
+
+/* ── SIDEBAR ── */
+.sidebar{grid-area:sb;border-right:1px solid var(--border);padding:14px 0;background:var(--bg);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.sb-sec{padding:5px 14px;margin-bottom:3px}
+.sb-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:7px}
+.model-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.model-btn{padding:7px 5px;text-align:center;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s}
+.model-btn:hover{border-color:var(--border2);color:var(--text)}
+.model-btn.active{border-color:var(--accent-border);background:var(--accent-bg);color:var(--accent)}
+.model-ram{font-size:9px;color:var(--text3);font-weight:400;display:block;margin-top:1px}
+.model-btn.active .model-ram{color:rgba(79,142,247,.6)}
+.sb-div{height:1px;background:var(--border);margin:10px 0}
+.cat-nav-item{display:flex;align-items:center;gap:7px;padding:5px 14px;font-size:12px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all .12s}
+.cat-nav-item:hover{color:var(--text);background:var(--bg2)}
+.cat-nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg)}
+.cat-count{margin-left:auto;font-size:10px;background:var(--bg3);padding:1px 6px;border-radius:9px;color:var(--text3)}
+.cat-nav-item.active .cat-count{background:var(--accent-bg);color:var(--accent)}
+.sel-pills{display:flex;flex-wrap:wrap;gap:5px;padding:2px 0}
+.sel-pill{display:flex;align-items:center;gap:4px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:20px;padding:2px 9px;font-size:10px;color:var(--accent);font-weight:600}
+.pill-rm{cursor:pointer;opacity:.6;font-size:12px;line-height:1;transition:opacity .12s}
+.pill-rm:hover{opacity:1}
+
+/* ── MAIN ── */
+main{grid-area:mn;padding:20px;overflow-y:auto}
+.page{display:none}
+.page.active{display:block}
+
+/* ── CARDS ── */
+.sec-block{margin-bottom:28px}
+.sec-hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.sec-title{font-size:13px;font-weight:700}
+.sec-sub{font-size:11px;color:var(--text3)}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:9px}
+.svc-card{border:1px solid var(--border);border-radius:var(--rl);padding:13px;background:var(--bg2);cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:7px;user-select:none;position:relative}
+.svc-card:hover{border-color:var(--border2);background:var(--bg3)}
+.svc-card.selected{border-color:var(--accent-border);background:var(--accent-bg)}
+.svc-card.dim{opacity:.38;cursor:not-allowed}
+.svc-hdr{display:flex;align-items:flex-start;gap:9px}
+.svc-emoji{font-size:19px;flex-shrink:0;margin-top:1px}
+.svc-tg{flex:1;min-width:0}
+.svc-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc-port{font-size:10px;color:var(--text3);margin-top:1px}
+.svc-chk{width:17px;height:17px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.svc-card.selected .svc-chk{background:var(--accent);border-color:var(--accent)}
+.svc-desc{font-size:11px;color:var(--text2);line-height:1.45}
+
+/* license row */
+.svc-lic{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:1px}
+.lic-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:9px;text-transform:uppercase;letter-spacing:.05em;text-decoration:none;transition:opacity .12s}
+.lic-badge:hover{opacity:.8}
+.lic-mit,.lic-apache,.lic-isc,.lic-bsd,.lic-zlib,.lic-epl,.lic-unknown{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.lic-gpl,.lic-agpl,.lic-eupl,.lic-custom{background:var(--orange-bg);color:var(--orange);border:1px solid rgba(247,168,79,.3)}
+.lic-proprietary,.lic-sustainable,.lic-sspl{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.comm-yes{font-size:9px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);padding:2px 7px;border-radius:9px;white-space:nowrap}
+.comm-no{font-size:9px;background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);padding:2px 7px;border-radius:9px;white-space:nowrap}
+.repo-link{font-size:9px;color:var(--text3);text-decoration:none;padding:2px 7px;border:1px solid var(--border);border-radius:9px;transition:all .12s;white-space:nowrap}
+.repo-link:hover{color:var(--text2);border-color:var(--border2)}
+
+.svc-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:9px;text-transform:uppercase;letter-spacing:.05em}
+.t-ok{background:var(--green-bg);color:var(--green)}
+.t-med{background:var(--orange-bg);color:var(--orange)}
+.t-hi{background:var(--red-bg);color:var(--red)}
+.t-3{background:rgba(62,207,142,.08);color:var(--green)}
+.t-4{background:var(--accent-bg);color:var(--accent)}
+.t-5{background:var(--purple-bg);color:var(--purple)}
+
+/* ── MANAGER ── */
+.mgr-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.mgr-layout{grid-template-columns:1fr}}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px}
+.panel-title{font-size:13px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-full{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:4px}
+label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+input,select,textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:inherit;font-size:11px;padding:7px 10px;transition:border-color .15s;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+textarea{resize:vertical;min-height:90px;line-height:1.5}
+select option{background:var(--bg3)}
+.radio-row{display:flex;gap:10px;align-items:center;padding:5px 0}
+.radio-row input[type=radio]{width:auto;accent-color:var(--accent)}
+.radio-row label{font-size:11px;text-transform:none;letter-spacing:0;font-weight:400;color:var(--text2);cursor:pointer}
+.form-actions{display:flex;gap:8px;margin-top:4px}
+.btn{padding:7px 14px;font-family:inherit;font-size:11px;font-weight:700;border-radius:var(--r);cursor:pointer;transition:all .15s;border:1px solid transparent}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{opacity:.85}
+.btn-ghost{background:transparent;border-color:var(--border2);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--border3);color:var(--text)}
+.btn-danger{background:transparent;border-color:var(--red-border);color:var(--red)}
+.btn-danger:hover{background:var(--red-bg)}
+.btn-green{background:var(--green);color:#0a1a10;border-color:var(--green)}
+.btn-green:hover{opacity:.85}
+
+/* service list in manager */
+.svc-list{display:flex;flex-direction:column;gap:6px;max-height:520px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.svc-row{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg3);transition:border-color .12s}
+.svc-row:hover{border-color:var(--border2)}
+.svc-row.custom-svc{border-left:2px solid var(--purple)}
+.svc-row-emoji{font-size:16px;flex-shrink:0}
+.svc-row-info{flex:1;min-width:0}
+.svc-row-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc-row-meta{font-size:10px;color:var(--text3);margin-top:1px}
+.svc-row-actions{display:flex;gap:5px;flex-shrink:0}
+.icon-btn{width:27px;height:27px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);border-radius:6px;background:none;color:var(--text3);cursor:pointer;transition:all .12s;font-size:13px}
+.icon-btn:hover{border-color:var(--border3);color:var(--text)}
+.icon-btn.del:hover{border-color:var(--red-border);color:var(--red);background:var(--red-bg)}
+
+/* import/export panel */
+.io-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.io-hint{font-size:10px;color:var(--text3);line-height:1.5;margin-top:6px}
+.drop-zone{border:1px dashed var(--border2);border-radius:var(--r);padding:20px;text-align:center;font-size:11px;color:var(--text3);cursor:pointer;transition:all .15s;margin-bottom:10px}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.toast{position:fixed;bottom:24px;right:24px;padding:10px 16px;border-radius:var(--r);font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{background:var(--green);color:#0a1a10}
+.toast.err{background:var(--red);color:#fff}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:24px;max-width:800px;width:calc(100% - 40px);max-height:calc(100vh - 80px);overflow-y:auto;position:relative}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:11px;color:var(--text2);margin-bottom:18px}
+.file-tabs{display:flex;gap:3px;border-bottom:1px solid var(--border);margin-bottom:0}
+.ftab{padding:7px 13px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;font-family:inherit;transition:all .15s;margin-bottom:-1px}
+.ftab:hover{color:var(--text)}
+.ftab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.fpane{display:none;margin-top:12px}
+.fpane.active{display:block}
+.code{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:10px;line-height:1.7;white-space:pre;overflow-x:auto;color:var(--text);max-height:360px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.modal-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.close-btn{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px;transition:color .12s;line-height:1}
+.close-btn:hover{color:var(--text)}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+@media(max-width:700px){
+  .shell{grid-template-columns:1fr;grid-template-areas:"hd" "mn"}
+  .sidebar{display:none}
+  .h-stats .hstat:not(:last-child){display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- HEADER -->
+<header>
+  <div class="logo"><div class="logo-icon">🍓</div>RPi Homelab</div>
+  <div class="h-mid"></div>
+  <div class="h-stats">
+    <div class="hstat"><span class="hstat-v" id="h-cnt">0</span><span class="hstat-l">serwisów</span></div>
+    <div class="ram-pill">
+      <div class="ram-track"><div class="ram-fill" id="h-ram-bar" style="width:0%"></div></div>
+      <span id="h-ram-txt" style="color:var(--text2)">0 MB</span>
+    </div>
+    <div class="hstat"><span class="hstat-v" id="h-disk">0 GB</span><span class="hstat-l">dysku</span></div>
+  </div>
+  <div class="h-nav">
+    <button class="h-tab active" onclick="switchPage('configurator',this)">⚙ Konfigurator</button>
+    <button class="h-tab" onclick="switchPage('manager',this)">📦 Serwisy</button>
+  </div>
+  <button class="gen-btn" id="gen-btn" disabled onclick="openModal()">⬇ Generuj pliki</button>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-sec">
+    <div class="sb-lbl">Model RPi</div>
+    <div class="model-grid">
+      <button class="model-btn" onclick="setModel(this,3)">RPi 3<span class="model-ram">1 GB RAM</span></button>
+      <button class="model-btn active" onclick="setModel(this,4)">RPi 4<span class="model-ram">2–4 GB RAM</span></button>
+      <button class="model-btn" onclick="setModel(this,5)">RPi 5<span class="model-ram">4–8 GB RAM</span></button>
+      <button class="model-btn" onclick="setModel(this,99)">Dowolny<span class="model-ram">bez limitu</span></button>
+    </div>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-sec"><div class="sb-lbl">Kategorie</div></div>
+  <div id="cat-nav"></div>
+  <div class="sb-div"></div>
+  <div class="sb-sec">
+    <div class="sb-lbl" style="margin-bottom:8px">Wybrane</div>
+    <div class="sel-pills" id="sel-pills"><span style="font-size:10px;color:var(--text3)">Brak</span></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+
+  <!-- PAGE: CONFIGURATOR -->
+  <div class="page active" id="page-configurator">
+    <div id="cats-container"></div>
+  </div>
+
+  <!-- PAGE: MANAGER -->
+  <div class="page" id="page-manager">
+    <div class="mgr-layout">
+
+      <!-- left: add/edit form -->
+      <div>
+        <div class="panel">
+          <div class="panel-title" id="form-title">➕ Dodaj serwis</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Emoji / ikona</label>
+              <input id="f-emoji" type="text" placeholder="🐳" maxlength="4">
+            </div>
+            <div class="form-group">
+              <label>Nazwa *</label>
+              <input id="f-name" type="text" placeholder="np. Gitea">
+            </div>
+            <div class="form-group">
+              <label>Kategoria *</label>
+              <input id="f-cat" type="text" placeholder="np. Dev & CI/CD" list="cat-list">
+              <datalist id="cat-list"></datalist>
+            </div>
+            <div class="form-group">
+              <label>Port</label>
+              <input id="f-port" type="text" placeholder="np. 3000">
+            </div>
+            <div class="form-group">
+              <label>RAM (MB) *</label>
+              <input id="f-ram" type="number" placeholder="256" min="10">
+            </div>
+            <div class="form-group">
+              <label>Dysk (GB)</label>
+              <input id="f-disk" type="number" placeholder="1" min="0">
+            </div>
+            <div class="form-group">
+              <label>Min. RPi</label>
+              <select id="f-minrpi">
+                <option value="3">RPi 3+</option>
+                <option value="4">RPi 4+</option>
+                <option value="5">RPi 5+</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Licencja</label>
+              <input id="f-lic" type="text" placeholder="MIT" list="lic-list">
+              <datalist id="lic-list">
+                <option value="MIT"><option value="Apache-2.0"><option value="GPL-3.0">
+                <option value="GPL-2.0"><option value="AGPL-3.0"><option value="LGPL-3.0">
+                <option value="BSD-3-Clause"><option value="ISC"><option value="MPL-2.0">
+                <option value="EPL-2.0"><option value="EUPL-1.2"><option value="Zlib">
+                <option value="Proprietary"><option value="Sustainable Use"><option value="SSPL">
+              </datalist>
+            </div>
+            <div class="form-group form-full">
+              <label>URL repozytorium</label>
+              <input id="f-repo" type="url" placeholder="https://github.com/...">
+            </div>
+            <div class="form-group form-full">
+              <label>URL licencji</label>
+              <input id="f-licurl" type="url" placeholder="https://github.com/.../LICENSE">
+            </div>
+            <div class="form-group form-full">
+              <label>Użycie komercyjne</label>
+              <div class="radio-row">
+                <input type="radio" name="comm" id="comm-y" value="true" checked>
+                <label for="comm-y">✅ Dozwolone</label>
+                <input type="radio" name="comm" id="comm-n" value="false">
+                <label for="comm-n">⛔ Niedozwolone / ograniczone</label>
+              </div>
+            </div>
+            <div class="form-group form-full">
+              <label>Opis</label>
+              <input id="f-desc" type="text" placeholder="Krótki opis serwisu">
+            </div>
+            <div class="form-group form-full">
+              <label>docker-compose snippet</label>
+              <textarea id="f-compose" placeholder="  myservice:&#10;    image: myimage:latest&#10;    container_name: myservice&#10;    restart: unless-stopped&#10;    ports:&#10;      - &quot;3000:3000&quot;"></textarea>
+            </div>
+          </div>
+          <div class="form-actions" style="margin-top:12px">
+            <button class="btn btn-primary" onclick="submitForm()">💾 Zapisz serwis</button>
+            <button class="btn btn-ghost" onclick="resetForm()" id="cancel-btn" style="display:none">✕ Anuluj</button>
+          </div>
+        </div>
+
+        <!-- import/export -->
+        <div class="panel" style="margin-top:16px">
+          <div class="panel-title">📂 Import / Export</div>
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            📄 Kliknij lub upuść plik <code>services.json</code>
+          </div>
+          <input type="file" id="file-input" accept=".json" style="display:none" onchange="importJSON(event)">
+          <div id="storage-status" style="font-size:10px;color:var(--text3);padding:6px 0;min-height:18px;"></div>
+          <div class="io-row">
+            <button class="btn btn-green" onclick="exportJSON()">⬇ Eksportuj services.json</button>
+            <button class="btn btn-ghost" onclick="resetToBuiltin()">↩ Przywróć z pliku</button>
+            <button class="btn btn-danger" onclick="if(confirm('Wyczyścić pamięć przeglądarki?')){clearStorage();showToast('Pamięć wyczyszczona — odśwież stronę','ok');updateStorageStatus('⚠ Pamięć wyczyszczona');}">🗑 Wyczyść cache</button>
+          </div>
+          <div class="io-hint">
+            Serwisy zapamiętywane automatycznie w przeglądarce — działają bez serwera HTTP po pierwszym załadowaniu.<br>
+            Gdy zaktualizujesz <code>services.json</code> w repo, konfigurator pokaże baner z propozycją dołączenia nowych serwisów.<br>
+            <span style="color:var(--orange)">⚠ Cache jest przypisany do tej przeglądarki — eksportuj JSON żeby przenieść zmiany do repo.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- right: service list -->
+      <div class="panel">
+        <div class="panel-title">
+          📋 Wszystkie serwisy
+          <span id="svc-count-badge" style="font-size:10px;background:var(--bg3);padding:2px 8px;border-radius:9px;color:var(--text3);font-weight:400;margin-left:4px"></span>
+        </div>
+        <div class="svc-list" id="mgr-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+</div><!-- /shell -->
+
+<!-- GENERATE MODAL -->
+<div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <div class="modal-title">Wygenerowane pliki konfiguracji</div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div class="file-tabs" id="modal-tabs"></div>
+    <div id="modal-panes"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="dlActive()">⬇ Pobierz aktywny plik</button>
+      <button class="btn btn-primary" onclick="dlAll()">⬇ Pobierz wszystkie</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Zamknij</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+const S = {
+  services: [],    // all loaded services (builtin + custom)
+  builtin: [],     // original from JSON (for reset)
+  selected: new Set(),
+  model: 4,
+  editId: null,    // null = adding, string = editing
+  activePage: 'configurator',
+  activeTab: null,
+};
+const RAM_MAX = { 3:1024, 4:4096, 5:8192, 99:99999 };
+
+// ═══════════════════════════════════════════
+//  STORAGE — localStorage persistence
+// ═══════════════════════════════════════════
+const LS_SERVICES = 'rpi_configurator_services';
+const LS_VERSION  = 'rpi_configurator_version';
+
+function saveToStorage(services) {
+  try {
+    localStorage.setItem(LS_SERVICES, JSON.stringify(services));
+    localStorage.setItem(LS_VERSION, String(Date.now()));
+  } catch(e) { /* storage full or private mode */ }
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(LS_SERVICES);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) return null;
+    return parsed;
+  } catch(e) { return null; }
+}
+
+function clearStorage() {
+  try {
+    localStorage.removeItem(LS_SERVICES);
+    localStorage.removeItem(LS_VERSION);
+  } catch(e) {}
+}
+
+function storageAge() {
+  try {
+    const ts = parseInt(localStorage.getItem(LS_VERSION) || '0');
+    if (!ts) return null;
+    const diff = Date.now() - ts;
+    if (diff < 60000) return 'przed chwilą';
+    if (diff < 3600000) return `${Math.floor(diff/60000)} min temu`;
+    if (diff < 86400000) return `${Math.floor(diff/3600000)} godz. temu`;
+    return `${Math.floor(diff/86400000)} dni temu`;
+  } catch(e) { return null; }
+}
+
+// ═══════════════════════════════════════════
+//  BOOT — localStorage first, then fetch
+// ═══════════════════════════════════════════
+async function boot() {
+  // 1. Try localStorage — instant, works on file:// too
+  const cached = loadFromStorage();
+  if (cached) {
+    S.services = cached;
+    S.builtin  = JSON.parse(JSON.stringify(cached));
+    render();
+    renderManager();
+    updateStorageStatus(`💾 Załadowano z pamięci (${storageAge()})`);
+
+    // Silently try to fetch fresh services.json in background
+    // If it has a newer structure (more services), offer to merge
+    tryFetchInBackground();
+    return;
+  }
+
+  // 2. No cache — try fetching services.json (HTTP server)
+  try {
+    const r = await fetch('./services.json');
+    if (!r.ok) throw new Error('fetch failed');
+    S.services = await r.json();
+    saveToStorage(S.services);
+    S.builtin = JSON.parse(JSON.stringify(S.services));
+    render();
+    renderManager();
+    updateStorageStatus(`✅ Załadowano z pliku i zapisano (${S.services.length} serwisów)`);
+  } catch(e) {
+    // 3. file:// with no cache — empty state with clear instructions
+    S.services = [];
+    S.builtin  = [];
+    render();
+    renderManager();
+    updateStorageStatus('⚠ Brak danych — wgraj services.json przez Import');
+    showToast('Otwórz przez serwer HTTP lub zaimportuj services.json ręcznie', 'err', 6000);
+  }
+}
+
+async function tryFetchInBackground() {
+  try {
+    const r = await fetch('./services.json?_=' + Date.now()); // bypass cache
+    if (!r.ok) return;
+    const fresh = await r.json();
+    if (!Array.isArray(fresh) || fresh.length === 0) return;
+
+    // Count how many IDs from the file are missing in current localStorage
+    const cachedIds = new Set(S.services.map(s=>s.id));
+    const newOnes   = fresh.filter(s => !cachedIds.has(s.id));
+
+    if (newOnes.length > 0) {
+      // Show merge banner
+      showMergeBanner(newOnes, fresh);
+    }
+  } catch(e) { /* offline or file:// — silently ignore */ }
+}
+
+function showMergeBanner(newOnes, fullFreshList) {
+  const existing = document.getElementById('merge-banner');
+  if (existing) existing.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'merge-banner';
+  banner.style.cssText = `
+    position:fixed; bottom:70px; right:24px; z-index:998;
+    background:var(--bg3); border:1px solid var(--accent-border);
+    border-radius:var(--rl); padding:12px 16px; max-width:320px;
+    font-size:11px; color:var(--text2); line-height:1.5;
+    box-shadow:0 4px 20px rgba(0,0,0,.4);
+  `;
+  banner.innerHTML = `
+    <div style="font-weight:700;color:var(--text);margin-bottom:6px">
+      🔄 services.json ma ${newOnes.length} nowych serwisów
+    </div>
+    <div style="margin-bottom:10px">${newOnes.map(s=>s.name).join(', ')}</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="mergeFromFile()" style="flex:1;padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">Dołącz nowe</button>
+      <button onclick="replaceFromFile()" style="flex:1;padding:5px 10px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer">Zastąp wszystko</button>
+      <button onclick="document.getElementById('merge-banner').remove()" style="padding:5px 8px;background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer">✕</button>
+    </div>
+  `;
+
+  // Store for the button handlers
+  banner._freshList = fullFreshList;
+  banner._newOnes   = newOnes;
+  document.body.appendChild(banner);
+}
+
+let _pendingFreshList = null;
+
+async function mergeFromFile() {
+  try {
+    const r = await fetch('./services.json?_=' + Date.now());
+    const fresh = await r.json();
+    const cachedIds = new Set(S.services.map(s=>s.id));
+    const toAdd = fresh.filter(s => !cachedIds.has(s.id));
+    S.services = [...S.services, ...toAdd];
+    saveToStorage(S.services);
+    S.builtin = JSON.parse(JSON.stringify(S.services));
+    render(); renderManager();
+    document.getElementById('merge-banner')?.remove();
+    showToast(`Dodano ${toAdd.length} nowych serwisów z pliku`, 'ok');
+    updateStorageStatus(`💾 Połączono — ${S.services.length} serwisów łącznie`);
+  } catch(e) { showToast('Błąd podczas łączenia', 'err'); }
+}
+
+async function replaceFromFile() {
+  try {
+    const r = await fetch('./services.json?_=' + Date.now());
+    const fresh = await r.json();
+    S.services = fresh;
+    saveToStorage(S.services);
+    S.builtin = JSON.parse(JSON.stringify(S.services));
+    render(); renderManager();
+    document.getElementById('merge-banner')?.remove();
+    showToast(`Zastąpiono — załadowano ${fresh.length} serwisów z pliku`, 'ok');
+    updateStorageStatus(`✅ Zastąpiono z pliku — ${S.services.length} serwisów`);
+  } catch(e) { showToast('Błąd podczas ładowania', 'err'); }
+}
+
+function updateStorageStatus(msg) {
+  const el = document.getElementById('storage-status');
+  if (el) el.textContent = msg;
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function cats() {
+  const seen = [], order = [];
+  S.services.forEach(s => { if (!seen.includes(s.cat)) { seen.push(s.cat); order.push(s.cat); }});
+  return order;
+}
+function selSvcs() { return S.services.filter(s => S.selected.has(s.id)); }
+function totalRam() { const sv=selSvcs(); return sv.reduce((a,s)=>a+s.ram,0)+(sv.length>0?300:0); }
+function totalDisk() { const sv=selSvcs(); return sv.reduce((a,s)=>a+s.disk,0)+(sv.length>0?4:0); }
+
+function licClass(lic) {
+  if (!lic) return 'lic-unknown';
+  const l = lic.toLowerCase();
+  if (l.includes('mit')||l.includes('isc')||l.includes('bsd')||l.includes('zlib')||l.includes('apache')||l.includes('epl')) return 'lic-mit';
+  if (l.includes('agpl')) return 'lic-agpl';
+  if (l.includes('gpl')||l.includes('eupl')) return 'lic-gpl';
+  if (l.includes('proprietary')||l.includes('commercial')) return 'lic-proprietary';
+  if (l.includes('sustainable')||l.includes('sspl')) return 'lic-sustainable';
+  return 'lic-unknown';
+}
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function slug(s){ return s.replace(/[^a-z0-9]/gi,'_'); }
+
+// ═══════════════════════════════════════════
+//  RENDER — CONFIGURATOR
+// ═══════════════════════════════════════════
+function render() {
+  renderConfigurator();
+  renderSidebar();
+  updateHeader();
+}
+
+function renderConfigurator() {
+  const container = document.getElementById('cats-container');
+  const maxRam = RAM_MAX[S.model];
+  let html = '';
+  cats().forEach(cat => {
+    const svcs = S.services.filter(s => s.cat === cat);
+    html += `<div class="sec-block" id="cat-${slug(cat)}">
+      <div class="sec-hdr"><span class="sec-title">${escHtml(cat)}</span><span class="sec-sub">${svcs.length} serwisów</span></div>
+      <div class="svc-grid">`;
+    svcs.forEach(s => {
+      const sel = S.selected.has(s.id);
+      const dim = s.minRpi > S.model;
+      const ramCls = s.ram>=400?'t-hi':s.ram>=200?'t-med':'t-ok';
+      const rpiCls = s.minRpi<=3?'t-3':s.minRpi===4?'t-4':'t-5';
+      const rpiLbl = s.minRpi<=3?'RPi 3+':s.minRpi===4?'RPi 4+':'RPi 5+';
+      const lc = licClass(s.license);
+      const commHtml = s.commercial===true
+        ? '<span class="comm-yes">✓ Kom.</span>'
+        : s.commercial===false
+          ? '<span class="comm-no">✗ Kom.</span>'
+          : '';
+      const repoHtml = s.repoUrl ? `<a class="repo-link" href="${escHtml(s.repoUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ repo</a>` : '';
+      const licHtml = s.license
+        ? (s.licenseUrl
+            ? `<a class="lic-badge ${lc}" href="${escHtml(s.licenseUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${escHtml(s.license)}</a>`
+            : `<span class="lic-badge ${lc}">${escHtml(s.license)}</span>`)
+        : '';
+
+      html += `<div class="svc-card${sel?' selected':''}${dim?' dim':''}"
+          onclick="${dim?'':`toggleSvc('${s.id}')`}"
+          title="${dim?`Wymaga RPi ${s.minRpi}+`:''}">
+        <div class="svc-hdr">
+          <span class="svc-emoji">${s.emoji||'📦'}</span>
+          <div class="svc-tg">
+            <div class="svc-name">${escHtml(s.name)}</div>
+            <div class="svc-port">:${escHtml(s.port||'—')}</div>
+          </div>
+          <div class="svc-chk">${sel?'<svg width="9" height="9" viewBox="0 0 10 10" fill="none"><path d="M2 5L4.5 7.5L8 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}</div>
+        </div>
+        <div class="svc-desc">${escHtml(s.desc||'')}</div>
+        <div class="svc-lic">${licHtml}${commHtml}${repoHtml}</div>
+        <div class="svc-tags">
+          <span class="tag ${ramCls}">${s.ram} MB</span>
+          <span class="tag ${rpiCls}">${rpiLbl}</span>
+          ${dim?'<span class="tag t-hi">Wymaga mocniejszego RPi</span>':''}
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  container.innerHTML = html || '<div style="color:var(--text3);padding:40px;text-align:center">Brak serwisów — dodaj je w zakładce Serwisy.</div>';
+}
+
+function renderSidebar() {
+  // cat nav
+  const nav = document.getElementById('cat-nav');
+  nav.innerHTML = cats().map(cat => {
+    const selN = S.services.filter(s=>s.cat===cat&&S.selected.has(s.id)).length;
+    const tot  = S.services.filter(s=>s.cat===cat).length;
+    return `<div class="cat-nav-item" onclick="scrollToCat('${slug(cat)}')" >
+      <span>${escHtml(cat)}</span>
+      <span class="cat-count">${selN>0?selN:tot}</span>
+    </div>`;
+  }).join('');
+
+  // pills
+  const pills = document.getElementById('sel-pills');
+  const sv = selSvcs();
+  pills.innerHTML = sv.length===0
+    ? '<span style="font-size:10px;color:var(--text3)">Brak</span>'
+    : sv.map(s=>`<div class="sel-pill">${s.emoji||'📦'} ${escHtml(s.name)}<span class="pill-rm" onclick="toggleSvc('${s.id}')">×</span></div>`).join('');
+}
+
+function updateHeader() {
+  const sv = selSvcs();
+  const ram = totalRam();
+  const maxR = RAM_MAX[S.model];
+  const pct = Math.min(100,(ram/maxR)*100);
+  document.getElementById('h-cnt').textContent = sv.length;
+  document.getElementById('h-ram-txt').textContent = ram>=1024?(ram/1024).toFixed(1)+' GB':ram+' MB';
+  document.getElementById('h-disk').textContent = totalDisk()+' GB';
+  const bar = document.getElementById('h-ram-bar');
+  bar.style.width = pct+'%';
+  bar.style.background = pct<50?'var(--green)':pct<80?'var(--orange)':'var(--red)';
+  document.getElementById('gen-btn').disabled = sv.length===0;
+}
+
+// ═══════════════════════════════════════════
+//  RENDER — MANAGER
+// ═══════════════════════════════════════════
+function renderManager() {
+  // datalist for cats
+  const cl = document.getElementById('cat-list');
+  cl.innerHTML = cats().map(c=>`<option value="${escHtml(c)}">`).join('');
+
+  // service list
+  const list = document.getElementById('mgr-list');
+  const badge = document.getElementById('svc-count-badge');
+  badge.textContent = S.services.length + ' serwisów';
+
+  list.innerHTML = S.services.map(s => {
+    const isCustom = !S.builtin.find(b=>b.id===s.id);
+    return `<div class="svc-row${isCustom?' custom-svc':''}">
+      <span class="svc-row-emoji">${s.emoji||'📦'}</span>
+      <div class="svc-row-info">
+        <div class="svc-row-name">${escHtml(s.name)}</div>
+        <div class="svc-row-meta">${escHtml(s.cat)} · ${s.license||'?'} · ${s.ram} MB${isCustom?' · <span style="color:var(--purple)">własny</span>':''}</div>
+      </div>
+      <div class="svc-row-actions">
+        <button class="icon-btn" onclick="editSvc('${s.id}')" title="Edytuj">✏</button>
+        <button class="icon-btn del" onclick="deleteSvc('${s.id}')" title="Usuń">✕</button>
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--text3);font-size:11px;padding:12px">Brak serwisów.</div>';
+}
+
+// ═══════════════════════════════════════════
+//  ACTIONS — CONFIGURATOR
+// ═══════════════════════════════════════════
+function toggleSvc(id) {
+  S.selected.has(id)?S.selected.delete(id):S.selected.add(id);
+  render();
+}
+
+function setModel(btn, model) {
+  document.querySelectorAll('.model-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  S.model = model;
+  render();
+}
+
+function scrollToCat(catSlug) {
+  const el = document.getElementById('cat-'+catSlug);
+  if (el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function switchPage(page, btn) {
+  document.querySelectorAll('.h-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  S.activePage = page;
+  if (page==='manager') renderManager();
+}
+
+// ═══════════════════════════════════════════
+//  ACTIONS — MANAGER FORM
+// ═══════════════════════════════════════════
+function resetForm() {
+  S.editId = null;
+  document.getElementById('form-title').textContent = '➕ Dodaj serwis';
+  document.getElementById('cancel-btn').style.display = 'none';
+  ['f-emoji','f-name','f-cat','f-port','f-ram','f-disk','f-lic','f-repo','f-licurl','f-desc','f-compose']
+    .forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('f-minrpi').value = '3';
+  document.getElementById('comm-y').checked = true;
+}
+
+function editSvc(id) {
+  const s = S.services.find(x=>x.id===id);
+  if (!s) return;
+  S.editId = id;
+  document.getElementById('form-title').textContent = `✏ Edytuj: ${s.name}`;
+  document.getElementById('cancel-btn').style.display = '';
+  document.getElementById('f-emoji').value  = s.emoji  || '';
+  document.getElementById('f-name').value   = s.name   || '';
+  document.getElementById('f-cat').value    = s.cat    || '';
+  document.getElementById('f-port').value   = s.port   || '';
+  document.getElementById('f-ram').value    = s.ram    || '';
+  document.getElementById('f-disk').value   = s.disk   || 0;
+  document.getElementById('f-minrpi').value = String(s.minRpi||3);
+  document.getElementById('f-lic').value    = s.license   || '';
+  document.getElementById('f-repo').value   = s.repoUrl   || '';
+  document.getElementById('f-licurl').value = s.licenseUrl|| '';
+  document.getElementById('f-desc').value   = s.desc      || '';
+  document.getElementById('f-compose').value= s.compose   || '';
+  document.querySelector(`input[name=comm][value="${s.commercial}"]`).checked = true;
+  // scroll to form
+  document.getElementById('page-manager').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function deleteSvc(id) {
+  if (!confirm('Usunąć ten serwis z listy?')) return;
+  S.services = S.services.filter(s=>s.id!==id);
+  S.selected.delete(id);
+  saveToStorage(S.services);
+  render();
+  renderManager();
+  showToast('Serwis usunięty i zapamiętany','ok');
+  updateStorageStatus(`💾 Zapisano (${S.services.length} serwisów)`);
+}
+
+function submitForm() {
+  const name = document.getElementById('f-name').value.trim();
+  const cat  = document.getElementById('f-cat').value.trim();
+  const ram  = parseInt(document.getElementById('f-ram').value)||0;
+  if (!name||!cat||!ram) { showToast('Wypełnij wymagane pola: Nazwa, Kategoria, RAM','err'); return; }
+
+  const obj = {
+    id:       S.editId || name.toLowerCase().replace(/[^a-z0-9]/g,'-')+'-'+Date.now(),
+    emoji:    document.getElementById('f-emoji').value.trim()||'📦',
+    name,
+    cat,
+    desc:     document.getElementById('f-desc').value.trim(),
+    ram,
+    disk:     parseInt(document.getElementById('f-disk').value)||0,
+    port:     document.getElementById('f-port').value.trim()||'—',
+    minRpi:   parseInt(document.getElementById('f-minrpi').value)||3,
+    license:  document.getElementById('f-lic').value.trim(),
+    licenseUrl: document.getElementById('f-licurl').value.trim(),
+    repoUrl:  document.getElementById('f-repo').value.trim(),
+    commercial: document.querySelector('input[name=comm]:checked').value==='true',
+    compose:  document.getElementById('f-compose').value,
+  };
+
+  if (S.editId) {
+    const idx = S.services.findIndex(s=>s.id===S.editId);
+    if (idx>-1) S.services[idx] = obj;
+    showToast('Serwis zaktualizowany i zapamiętany','ok');
+  } else {
+    S.services.push(obj);
+    showToast('Serwis dodany i zapamiętany','ok');
+  }
+
+  saveToStorage(S.services);
+  updateStorageStatus(`💾 Zapisano (${S.services.length} serwisów)`);
+  resetForm();
+  render();
+  renderManager();
+}
+
+// ═══════════════════════════════════════════
+//  IMPORT / EXPORT
+// ═══════════════════════════════════════════
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(S.services, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'services.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Pobierz i podmień plik services.json w repo','ok');
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error('Oczekiwana tablica JSON');
+      S.services = data;
+      S.builtin  = JSON.parse(JSON.stringify(data));
+      S.selected.clear();
+      saveToStorage(S.services);
+      render();
+      renderManager();
+      showToast(`Załadowano i zapamiętano ${data.length} serwisów`,'ok');
+      updateStorageStatus(`💾 Załadowano z importu — ${data.length} serwisów`);
+    } catch(err) {
+      showToast('Błąd parsowania JSON: '+err.message,'err');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function resetToBuiltin() {
+  if (!confirm('Przywrócić domyślną listę serwisów? Stracisz własne zmiany w przeglądarce.')) return;
+  clearStorage();
+  S.selected.clear();
+  // Re-fetch from file
+  fetch('./services.json?_='+Date.now())
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      S.services = data;
+      S.builtin  = JSON.parse(JSON.stringify(data));
+      saveToStorage(S.services);
+      render(); renderManager();
+      showToast(`Przywrócono ${data.length} serwisów z pliku`,'ok');
+      updateStorageStatus(`✅ Przywrócono z pliku — ${data.length} serwisów`);
+    })
+    .catch(() => {
+      S.services = []; S.builtin = [];
+      render(); renderManager();
+      showToast('Nie można załadować services.json — zaimportuj ręcznie','err');
+      updateStorageStatus('⚠ Brak danych — zaimportuj services.json');
+    });
+}
+
+// drag-drop
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error('Oczekiwana tablica JSON');
+      S.services = data;
+      S.builtin  = JSON.parse(JSON.stringify(data));
+      S.selected.clear();
+      saveToStorage(S.services);
+      render();
+      renderManager();
+      showToast(`Załadowano i zapamiętano ${data.length} serwisów`,'ok');
+      updateStorageStatus(`💾 Załadowano z importu — ${data.length} serwisów`);
+    } catch(err) {
+      showToast('Błąd parsowania JSON: '+err.message,'err');
+    }
+  };
+  reader.readAsText(file);
+});
+
+// ═══════════════════════════════════════════
+//  FILE GENERATION
+// ═══════════════════════════════════════════
+function genCompose() {
+  const sv = selSvcs();
+  const vols = new Set();
+  sv.forEach(s => {
+    const m = (s.compose||'').matchAll(/^\s+- ([a-z_]+):\/[^\n]+/gm);
+    for (const x of m) vols.add(x[1]);
+  });
+  let o = `version: "3.9"\n\n`;
+  o += `# ════════════════════════════════════════════════\n`;
+  o += `# RPi Homelab — wygenerowano przez RPi Configurator\n`;
+  o += `# Serwisy: ${sv.map(s=>s.name).join(', ')}\n`;
+  o += `# ════════════════════════════════════════════════\n\n`;
+  o += `services:\n\n`;
+  sv.forEach(s => {
+    o += `  # ─── ${s.name} ──────────────────────────────────\n`;
+    o += (s.compose||`  ${s.id}:\n    image: # TODO\n    container_name: ${s.id}\n    restart: unless-stopped`);
+    o += `\n\n`;
+  });
+  o += `networks:\n  default:\n    name: homelab\n    driver: bridge\n\n`;
+  if (vols.size>0) { o += `volumes:\n`; vols.forEach(v=>{ o += `  ${v}:\n`; }); }
+  return o;
+}
+
+function genEnv() {
+  const sv = selSvcs();
+  let o = `# .env — zmienne środowiskowe dla docker-compose\n# Wypełnij przed uruchomieniem: docker-compose up -d\n\n`;
+  const envMap = {
+    pihole:      `PIHOLE_PASSWORD=zmien_mnie\n`,
+    wireguard:   `WG_HOST=twoj.publiczny.ip\nWG_PASSWORD=zmien_mnie\n`,
+    cloudflared: `CF_TUNNEL_TOKEN=twoj_token_z_cloudflare_zero_trust\n`,
+    vaultwarden: `VW_ADMIN_TOKEN=zmien_mnie_na_losowy_string_64_znaki\n`,
+    grafana:     `GRAFANA_PASSWORD=zmien_mnie\n`,
+    n8n:         `N8N_PASSWORD=zmien_mnie\n`,
+    nextcloud:   `NEXTCLOUD_DB_PASSWORD=zmien_mnie\nNEXTCLOUD_DB_ROOT_PASSWORD=zmien_mnie\n`,
+    samba:       `SAMBA_PASSWORD=zmien_mnie\n`,
+    codeserver:  `CODESERVER_PASSWORD=zmien_mnie\nCODESERVER_SUDO_PASSWORD=zmien_mnie\n`,
+    woodpecker:  `WOODPECKER_SECRET=zmien_mnie_na_losowy_string\n`,
+    paperless:   `PAPERLESS_DB_PASSWORD=zmien_mnie\nPAPERLESS_ADMIN_PASSWORD=zmien_mnie\n`,
+    linkwarden:  `LINKWARDEN_DB_PASSWORD=zmien_mnie\nLINKWARDEN_SECRET=zmien_mnie_32_znaki\n`,
+  };
+  let hasEnv = false;
+  sv.forEach(s => { if (envMap[s.id]) { o += envMap[s.id]; hasEnv = true; } });
+  if (!hasEnv) o += `# Brak wymaganych zmiennych dla wybranych serwisów.\n`;
+  return o;
+}
+
+function genReadme() {
+  const sv = selSvcs();
+  const ram = totalRam(), disk = totalDisk();
+  let o = `# RPi Homelab — konfiguracja\n\nWygenerowano przez RPi Homelab Configurator.\n\n`;
+  o += `## Zainstalowane serwisy\n\n| Serwis | Licencja | Komercyjne | Port | RAM |\n|--------|----------|------------|------|-----|\n`;
+  sv.forEach(s => {
+    const comm = s.commercial===true?'✅':s.commercial===false?'⛔':'?';
+    const licMd = s.licenseUrl?`[${s.license||'?'}](${s.licenseUrl})`:(s.license||'?');
+    o += `| ${s.emoji||''} **${s.name}** | ${licMd} | ${comm} | ${s.port||'—'} | ~${s.ram} MB |\n`;
+  });
+  o += `| 🐳 **System + Docker** | — | — | — | ~300 MB |\n`;
+  o += `| **ŁĄCZNIE** | | | | **~${ram} MB** |\n\n`;
+  o += `## Wymagania\n\n- RAM: ~${ram} MB (${ram>2048?'RPi 4 4GB lub RPi 5':ram>900?'RPi 4 2GB+':'RPi 3+'})\n- Dysk: ~${disk} GB\n\n`;
+  o += `## Uruchomienie\n\n\`\`\`bash\ncp .env.example .env\nnano .env\ndocker-compose up -d\ndocker-compose ps\n\`\`\`\n\n`;
+  o += `## Adresy (lokalnie)\n\n`;
+  sv.forEach(s => {
+    const p = String(s.port||'').split(',')[0].trim().split(':')[0];
+    if (p && p!=='—' && !isNaN(p)) o += `- **${s.name}**: http://raspberrypi.local:${p}\n`;
+  });
+  o += `\n## Aktualizacja\n\n\`\`\`bash\ndocker-compose pull && docker-compose up -d\n\`\`\`\n`;
+  return o;
+}
+
+// ═══════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════
+const GEN = {};
+
+function openModal() {
+  const sv = selSvcs();
+  if (!sv.length) return;
+  GEN['docker-compose.yml'] = genCompose();
+  GEN['.env.example']       = genEnv();
+  GEN['README.md']          = genReadme();
+  document.getElementById('modal-sub').textContent =
+    `${sv.length} serwisów · ~${totalRam()} MB RAM · ~${totalDisk()} GB dysku`;
+  const tabs = Object.keys(GEN);
+  document.getElementById('modal-tabs').innerHTML =
+    tabs.map((n,i)=>`<button class="ftab${i===0?' active':''}" onclick="switchTab('${n}',this)">${n}</button>`).join('');
+  document.getElementById('modal-panes').innerHTML =
+    tabs.map((n,i)=>`<div class="fpane${i===0?' active':''}" id="fpane-${slug(n)}"><pre class="code">${escHtml(GEN[n])}</pre></div>`).join('');
+  S.activeTab = tabs[0];
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.fpane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('fpane-'+slug(name)).classList.add('active');
+  S.activeTab = name;
+}
+
+function dlActive() {
+  const c = GEN[S.activeTab]; if (!c) return;
+  dlText(S.activeTab, c);
+}
+function dlAll() {
+  Object.entries(GEN).forEach(([n,c],i)=>setTimeout(()=>dlText(n,c),i*250));
+}
+function dlText(name, content) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content],{type:'text/plain;charset=utf-8'}));
+  a.download = name; a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function showToast(msg, type='ok', dur=2600) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+// ═══════════════════════════════════════════
+//  START
+// ═══════════════════════════════════════════
+boot();
+</script>
+</body>
+</html>
