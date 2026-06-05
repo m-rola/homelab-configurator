@@ -199,7 +199,7 @@ select option{background:var(--bg3)}
   <div class="logo"><div class="logo-icon">🍓</div>RPi Homelab</div>
   <div class="h-mid"></div>
   <div class="h-stats">
-    <div class="hstat"><span class="hstat-v" id="h-cnt">0</span><span class="hstat-l">serwisów</span></div>
+    <div class="hstat"><span class="hstat-v" id="h-cnt">0</span><span class="hstat-l">services</span></div>
     <div class="ram-pill">
       <div class="ram-track"><div class="ram-fill" id="h-ram-bar" style="width:0%"></div></div>
       <span id="h-ram-txt" style="color:var(--text2)">0 MB</span>
@@ -207,30 +207,30 @@ select option{background:var(--bg3)}
     <div class="hstat"><span class="hstat-v" id="h-disk">0 GB</span><span class="hstat-l">dysku</span></div>
   </div>
   <div class="h-nav">
-    <button class="h-tab active" onclick="switchPage('configurator',this)">⚙ Konfigurator</button>
-    <button class="h-tab" onclick="switchPage('manager',this)">📦 Serwisy</button>
+    <button class="h-tab active" onclick="switchPage('configurator',this)">⚙ Configurator</button>
+    <button class="h-tab" onclick="switchPage('manager',this)">📦 Services</button>
   </div>
-  <button class="gen-btn" id="gen-btn" disabled onclick="openModal()">⬇ Generuj pliki</button>
+  <button class="gen-btn" id="gen-btn" disabled onclick="openModal()">⬇ Generate files</button>
 </header>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sb-sec">
-    <div class="sb-lbl">Model RPi</div>
+    <div class="sb-lbl">RPi Model</div>
     <div class="model-grid">
       <button class="model-btn" onclick="setModel(this,3)">RPi 3<span class="model-ram">1 GB RAM</span></button>
       <button class="model-btn active" onclick="setModel(this,4)">RPi 4<span class="model-ram">2–4 GB RAM</span></button>
       <button class="model-btn" onclick="setModel(this,5)">RPi 5<span class="model-ram">4–8 GB RAM</span></button>
-      <button class="model-btn" onclick="setModel(this,99)">Dowolny<span class="model-ram">bez limitu</span></button>
+      <button class="model-btn" onclick="setModel(this,99)">Any<span class="model-ram">no limit</span></button>
     </div>
   </div>
   <div class="sb-div"></div>
-  <div class="sb-sec"><div class="sb-lbl">Kategorie</div></div>
+  <div class="sb-sec"><div class="sb-lbl">Categories</div></div>
   <div id="cat-nav"></div>
   <div class="sb-div"></div>
   <div class="sb-sec">
-    <div class="sb-lbl" style="margin-bottom:8px">Wybrane</div>
-    <div class="sel-pills" id="sel-pills"><span style="font-size:10px;color:var(--text3)">Brak</span></div>
+    <div class="sb-lbl" style="margin-bottom:8px">Selected</div>
+    <div class="sel-pills" id="sel-pills"><span style="font-size:10px;color:var(--text3)">None</span></div>
   </div>
 </aside>
 
@@ -249,31 +249,31 @@ select option{background:var(--bg3)}
       <!-- left: add/edit form -->
       <div>
         <div class="panel">
-          <div class="panel-title" id="form-title">➕ Dodaj serwis</div>
+          <div class="panel-title" id="form-title">➕ Add service</div>
           <div class="form-grid">
             <div class="form-group">
-              <label>Emoji / ikona</label>
+              <label>Emoji / icon</label>
               <input id="f-emoji" type="text" placeholder="🐳" maxlength="4">
             </div>
             <div class="form-group">
-              <label>Nazwa *</label>
-              <input id="f-name" type="text" placeholder="np. Gitea">
+              <label>Name *</label>
+              <input id="f-name" type="text" placeholder="e.g. Gitea">
             </div>
             <div class="form-group">
-              <label>Kategoria *</label>
-              <input id="f-cat" type="text" placeholder="np. Dev & CI/CD" list="cat-list">
+              <label>Category *</label>
+              <input id="f-cat" type="text" placeholder="e.g. Dev & CI/CD" list="cat-list">
               <datalist id="cat-list"></datalist>
             </div>
             <div class="form-group">
               <label>Port</label>
-              <input id="f-port" type="text" placeholder="np. 3000">
+              <input id="f-port" type="text" placeholder="e.g. 3000">
             </div>
             <div class="form-group">
               <label>RAM (MB) *</label>
               <input id="f-ram" type="number" placeholder="256" min="10">
             </div>
             <div class="form-group">
-              <label>Dysk (GB)</label>
+              <label>Disk (GB)</label>
               <input id="f-disk" type="number" placeholder="1" min="0">
             </div>
             <div class="form-group">
@@ -285,7 +285,7 @@ select option{background:var(--bg3)}
               </select>
             </div>
             <div class="form-group">
-              <label>Licencja</label>
+              <label>License</label>
               <input id="f-lic" type="text" placeholder="MIT" list="lic-list">
               <datalist id="lic-list">
                 <option value="MIT"><option value="Apache-2.0"><option value="GPL-3.0">
@@ -296,25 +296,25 @@ select option{background:var(--bg3)}
               </datalist>
             </div>
             <div class="form-group form-full">
-              <label>URL repozytorium</label>
+              <label>Repository URL</label>
               <input id="f-repo" type="url" placeholder="https://github.com/...">
             </div>
             <div class="form-group form-full">
-              <label>URL licencji</label>
+              <label>License URL</label>
               <input id="f-licurl" type="url" placeholder="https://github.com/.../LICENSE">
             </div>
             <div class="form-group form-full">
-              <label>Użycie komercyjne</label>
+              <label>Commercial use</label>
               <div class="radio-row">
                 <input type="radio" name="comm" id="comm-y" value="true" checked>
-                <label for="comm-y">✅ Dozwolone</label>
+                <label for="comm-y">✅ Allowed</label>
                 <input type="radio" name="comm" id="comm-n" value="false">
-                <label for="comm-n">⛔ Niedozwolone / ograniczone</label>
+                <label for="comm-n">⛔ Not allowed / restricted</label>
               </div>
             </div>
             <div class="form-group form-full">
-              <label>Opis</label>
-              <input id="f-desc" type="text" placeholder="Krótki opis serwisu">
+              <label>Description</label>
+              <input id="f-desc" type="text" placeholder="Short service description">
             </div>
             <div class="form-group form-full">
               <label>docker-compose snippet</label>
@@ -322,8 +322,8 @@ select option{background:var(--bg3)}
             </div>
           </div>
           <div class="form-actions" style="margin-top:12px">
-            <button class="btn btn-primary" onclick="submitForm()">💾 Zapisz serwis</button>
-            <button class="btn btn-ghost" onclick="resetForm()" id="cancel-btn" style="display:none">✕ Anuluj</button>
+            <button class="btn btn-primary" onclick="submitForm()">💾 Save service</button>
+            <button class="btn btn-ghost" onclick="resetForm()" id="cancel-btn" style="display:none">✕ Cancel</button>
           </div>
         </div>
 
@@ -331,19 +331,19 @@ select option{background:var(--bg3)}
         <div class="panel" style="margin-top:16px">
           <div class="panel-title">📂 Import / Export</div>
           <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-            📄 Kliknij lub upuść plik <code>services.json</code>
+            📄 Click or drop <code>services.json</code>
           </div>
           <input type="file" id="file-input" accept=".json" style="display:none" onchange="importJSON(event)">
           <div id="storage-status" style="font-size:10px;color:var(--text3);padding:6px 0;min-height:18px;"></div>
           <div class="io-row">
-            <button class="btn btn-green" onclick="exportJSON()">⬇ Eksportuj services.json</button>
-            <button class="btn btn-ghost" onclick="resetToBuiltin()">↩ Przywróć z pliku</button>
-            <button class="btn btn-danger" onclick="if(confirm('Wyczyścić pamięć przeglądarki?')){clearStorage();showToast('Pamięć wyczyszczona — odśwież stronę','ok');updateStorageStatus('⚠ Pamięć wyczyszczona');}">🗑 Wyczyść cache</button>
+            <button class="btn btn-green" onclick="exportJSON()">⬇ Export services.json</button>
+            <button class="btn btn-ghost" onclick="resetToBuiltin()">↩ Restore from file</button>
+            <button class="btn btn-danger" onclick="if(confirm('Clear browser cache?')){clearStorage();showToast('Cache cleared — refresh the page','ok');updateStorageStatus('⚠ Cache cleared');}">🗑 Clear cache</button>
           </div>
           <div class="io-hint">
-            Serwisy zapamiętywane automatycznie w przeglądarce — działają bez serwera HTTP po pierwszym załadowaniu.<br>
-            Gdy zaktualizujesz <code>services.json</code> w repo, konfigurator pokaże baner z propozycją dołączenia nowych serwisów.<br>
-            <span style="color:var(--orange)">⚠ Cache jest przypisany do tej przeglądarki — eksportuj JSON żeby przenieść zmiany do repo.</span>
+            Services are automatically saved in the browser — works without an HTTP server after the first load.<br>
+            When you update <code>services.json</code> in the repo, the configurator will show a banner offering to merge new services.<br>
+            <span style="color:var(--orange)">⚠ Cache is tied to this browser — export JSON to move changes back to the repo.</span>
           </div>
         </div>
       </div>
@@ -351,7 +351,7 @@ select option{background:var(--bg3)}
       <!-- right: service list -->
       <div class="panel">
         <div class="panel-title">
-          📋 Wszystkie serwisy
+          📋 All services
           <span id="svc-count-badge" style="font-size:10px;background:var(--bg3);padding:2px 8px;border-radius:9px;color:var(--text3);font-weight:400;margin-left:4px"></span>
         </div>
         <div class="svc-list" id="mgr-list"></div>
@@ -431,10 +431,10 @@ function storageAge() {
     const ts = parseInt(localStorage.getItem(LS_VERSION) || '0');
     if (!ts) return null;
     const diff = Date.now() - ts;
-    if (diff < 60000) return 'przed chwilą';
-    if (diff < 3600000) return `${Math.floor(diff/60000)} min temu`;
-    if (diff < 86400000) return `${Math.floor(diff/3600000)} godz. temu`;
-    return `${Math.floor(diff/86400000)} dni temu`;
+    if (diff < 60000) return 'just now';
+    if (diff < 3600000) return `${Math.floor(diff/60000)} min ago`;
+    if (diff < 86400000) return `${Math.floor(diff/3600000)} hr ago`;
+    return `${Math.floor(diff/86400000)} days ago`;
   } catch(e) { return null; }
 }
 
@@ -449,7 +449,7 @@ async function boot() {
     S.builtin  = JSON.parse(JSON.stringify(cached));
     render();
     renderManager();
-    updateStorageStatus(`💾 Załadowano z pamięci (${storageAge()})`);
+    updateStorageStatus(`💾 Loaded from cache (${storageAge()})`);
 
     // Silently try to fetch fresh services.json in background
     // If it has a newer structure (more services), offer to merge
@@ -466,15 +466,15 @@ async function boot() {
     S.builtin = JSON.parse(JSON.stringify(S.services));
     render();
     renderManager();
-    updateStorageStatus(`✅ Załadowano z pliku i zapisano (${S.services.length} serwisów)`);
+    updateStorageStatus(`✅ Loaded from file and saved (${S.services.length} services)`);
   } catch(e) {
     // 3. file:// with no cache — empty state with clear instructions
     S.services = [];
     S.builtin  = [];
     render();
     renderManager();
-    updateStorageStatus('⚠ Brak danych — wgraj services.json przez Import');
-    showToast('Otwórz przez serwer HTTP lub zaimportuj services.json ręcznie', 'err', 6000);
+    updateStorageStatus('⚠ None danych — wgraj services.json przez Import');
+    showToast('Open via HTTP server or import services.json hasnually', 'err', 6000);
   }
 }
 
@@ -511,12 +511,12 @@ function showMergeBanner(newOnes, fullFreshList) {
   `;
   banner.innerHTML = `
     <div style="font-weight:700;color:var(--text);margin-bottom:6px">
-      🔄 services.json ma ${newOnes.length} nowych serwisów
+      🔄 services.json has ${newOnes.length} nowych services
     </div>
     <div style="margin-bottom:10px">${newOnes.map(s=>s.name).join(', ')}</div>
     <div style="display:flex;gap:8px">
-      <button onclick="mergeFromFile()" style="flex:1;padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">Dołącz nowe</button>
-      <button onclick="replaceFromFile()" style="flex:1;padding:5px 10px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer">Zastąp wszystko</button>
+      <button onclick="mergeFromFile()" style="flex:1;padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">Merge new</button>
+      <button onclick="replaceFromFile()" style="flex:1;padding:5px 10px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer">Replace all</button>
       <button onclick="document.getElementById('merge-banner').remove()" style="padding:5px 8px;background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer">✕</button>
     </div>
   `;
@@ -540,9 +540,9 @@ async function mergeFromFile() {
     S.builtin = JSON.parse(JSON.stringify(S.services));
     render(); renderManager();
     document.getElementById('merge-banner')?.remove();
-    showToast(`Dodano ${toAdd.length} nowych serwisów z pliku`, 'ok');
-    updateStorageStatus(`💾 Połączono — ${S.services.length} serwisów łącznie`);
-  } catch(e) { showToast('Błąd podczas łączenia', 'err'); }
+    showToast(`Added ${toAdd.length} nowych services z pliku`, 'ok');
+    updateStorageStatus(`💾 Merged — ${S.services.length} services total`);
+  } catch(e) { showToast('Error during merge', 'err'); }
 }
 
 async function replaceFromFile() {
@@ -554,9 +554,9 @@ async function replaceFromFile() {
     S.builtin = JSON.parse(JSON.stringify(S.services));
     render(); renderManager();
     document.getElementById('merge-banner')?.remove();
-    showToast(`Zastąpiono — załadowano ${fresh.length} serwisów z pliku`, 'ok');
-    updateStorageStatus(`✅ Zastąpiono z pliku — ${S.services.length} serwisów`);
-  } catch(e) { showToast('Błąd podczas ładowania', 'err'); }
+    showToast(`Replaced — loaded ${fresh.length} services z pliku`, 'ok');
+    updateStorageStatus(`✅ Replaced from file — ${S.services.length} services`);
+  } catch(e) { showToast('Error during load', 'err'); }
 }
 
 function updateStorageStatus(msg) {
@@ -607,7 +607,7 @@ function renderConfigurator() {
   cats().forEach(cat => {
     const svcs = S.services.filter(s => s.cat === cat);
     html += `<div class="sec-block" id="cat-${slug(cat)}">
-      <div class="sec-hdr"><span class="sec-title">${escHtml(cat)}</span><span class="sec-sub">${svcs.length} serwisów</span></div>
+      <div class="sec-hdr"><span class="sec-title">${escHtml(cat)}</span><span class="sec-sub">${svcs.length} services</span></div>
       <div class="svc-grid">`;
     svcs.forEach(s => {
       const sel = S.selected.has(s.id);
@@ -650,7 +650,7 @@ function renderConfigurator() {
     });
     html += `</div></div>`;
   });
-  container.innerHTML = html || '<div style="color:var(--text3);padding:40px;text-align:center">Brak serwisów — dodaj je w zakładce Serwisy.</div>';
+  container.innerHTML = html || '<div style="color:var(--text3);padding:40px;text-align:center">No services — add them in the Services tab.</div>';
 }
 
 function renderSidebar() {
@@ -669,7 +669,7 @@ function renderSidebar() {
   const pills = document.getElementById('sel-pills');
   const sv = selSvcs();
   pills.innerHTML = sv.length===0
-    ? '<span style="font-size:10px;color:var(--text3)">Brak</span>'
+    ? '<span style="font-size:10px;color:var(--text3)">None</span>'
     : sv.map(s=>`<div class="sel-pill">${s.emoji||'📦'} ${escHtml(s.name)}<span class="pill-rm" onclick="toggleSvc('${s.id}')">×</span></div>`).join('');
 }
 
@@ -698,7 +698,7 @@ function renderManager() {
   // service list
   const list = document.getElementById('mgr-list');
   const badge = document.getElementById('svc-count-badge');
-  badge.textContent = S.services.length + ' serwisów';
+  badge.textContent = S.services.length + ' services';
 
   list.innerHTML = S.services.map(s => {
     const isCustom = !S.builtin.find(b=>b.id===s.id);
@@ -706,14 +706,14 @@ function renderManager() {
       <span class="svc-row-emoji">${s.emoji||'📦'}</span>
       <div class="svc-row-info">
         <div class="svc-row-name">${escHtml(s.name)}</div>
-        <div class="svc-row-meta">${escHtml(s.cat)} · ${s.license||'?'} · ${s.ram} MB${isCustom?' · <span style="color:var(--purple)">własny</span>':''}</div>
+        <div class="svc-row-meta">${escHtml(s.cat)} · ${s.license||'?'} · ${s.ram} MB${isCustom?' · <span style="color:var(--purple)">custom</span>':''}</div>
       </div>
       <div class="svc-row-actions">
         <button class="icon-btn" onclick="editSvc('${s.id}')" title="Edytuj">✏</button>
-        <button class="icon-btn del" onclick="deleteSvc('${s.id}')" title="Usuń">✕</button>
+        <button class="icon-btn del" onclick="deleteSvc('${s.id}')" title="Delete">✕</button>
       </div>
     </div>`;
-  }).join('') || '<div style="color:var(--text3);font-size:11px;padding:12px">Brak serwisów.</div>';
+  }).join('') || '<div style="color:var(--text3);font-size:11px;padding:12px">None services.</div>';
 }
 
 // ═══════════════════════════════════════════
@@ -750,7 +750,7 @@ function switchPage(page, btn) {
 // ═══════════════════════════════════════════
 function resetForm() {
   S.editId = null;
-  document.getElementById('form-title').textContent = '➕ Dodaj serwis';
+  document.getElementById('form-title').textContent = '➕ Add service';
   document.getElementById('cancel-btn').style.display = 'none';
   ['f-emoji','f-name','f-cat','f-port','f-ram','f-disk','f-lic','f-repo','f-licurl','f-desc','f-compose']
     .forEach(id => { document.getElementById(id).value = ''; });
@@ -762,7 +762,7 @@ function editSvc(id) {
   const s = S.services.find(x=>x.id===id);
   if (!s) return;
   S.editId = id;
-  document.getElementById('form-title').textContent = `✏ Edytuj: ${s.name}`;
+  document.getElementById('form-title').textContent = `✏ Edit: ${s.name}`;
   document.getElementById('cancel-btn').style.display = '';
   document.getElementById('f-emoji').value  = s.emoji  || '';
   document.getElementById('f-name').value   = s.name   || '';
@@ -782,21 +782,21 @@ function editSvc(id) {
 }
 
 function deleteSvc(id) {
-  if (!confirm('Usunąć ten serwis z listy?')) return;
+  if (!confirm('Delete this service?')) return;
   S.services = S.services.filter(s=>s.id!==id);
   S.selected.delete(id);
   saveToStorage(S.services);
   render();
   renderManager();
-  showToast('Serwis usunięty i zapamiętany','ok');
-  updateStorageStatus(`💾 Zapisano (${S.services.length} serwisów)`);
+  showToast('Service deleted and saved','ok');
+  updateStorageStatus(`💾 Saved (${S.services.length} services)`);
 }
 
 function submitForm() {
   const name = document.getElementById('f-name').value.trim();
   const cat  = document.getElementById('f-cat').value.trim();
   const ram  = parseInt(document.getElementById('f-ram').value)||0;
-  if (!name||!cat||!ram) { showToast('Wypełnij wymagane pola: Nazwa, Kategoria, RAM','err'); return; }
+  if (!name||!cat||!ram) { showToast('Please fill in required fields: Name, Category, RAM','err'); return; }
 
   const obj = {
     id:       S.editId || name.toLowerCase().replace(/[^a-z0-9]/g,'-')+'-'+Date.now(),
@@ -818,14 +818,14 @@ function submitForm() {
   if (S.editId) {
     const idx = S.services.findIndex(s=>s.id===S.editId);
     if (idx>-1) S.services[idx] = obj;
-    showToast('Serwis zaktualizowany i zapamiętany','ok');
+    showToast('Service updated and saved','ok');
   } else {
     S.services.push(obj);
-    showToast('Serwis dodany i zapamiętany','ok');
+    showToast('Service added and saved','ok');
   }
 
   saveToStorage(S.services);
-  updateStorageStatus(`💾 Zapisano (${S.services.length} serwisów)`);
+  updateStorageStatus(`💾 Saved (${S.services.length} services)`);
   resetForm();
   render();
   renderManager();
@@ -841,7 +841,7 @@ function exportJSON() {
   a.download = 'services.json';
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast('Pobierz i podmień plik services.json w repo','ok');
+  showToast('Download and replace services.json in your repo','ok');
 }
 
 function importJSON(e) {
@@ -858,10 +858,10 @@ function importJSON(e) {
       saveToStorage(S.services);
       render();
       renderManager();
-      showToast(`Załadowano i zapamiętano ${data.length} serwisów`,'ok');
-      updateStorageStatus(`💾 Załadowano z importu — ${data.length} serwisów`);
+      showToast(`Loaded and saved ${data.length} services`,'ok');
+      updateStorageStatus(`💾 Loaded from import — ${data.length} services`);
     } catch(err) {
-      showToast('Błąd parsowania JSON: '+err.message,'err');
+      showToast('JSON parse error: '+err.message,'err');
     }
   };
   reader.readAsText(file);
@@ -869,7 +869,7 @@ function importJSON(e) {
 }
 
 function resetToBuiltin() {
-  if (!confirm('Przywrócić domyślną listę serwisów? Stracisz własne zmiany w przeglądarce.')) return;
+  if (!confirm('Restore the default service list? Your browser changes will be lost.')) return;
   clearStorage();
   S.selected.clear();
   // Re-fetch from file
@@ -880,14 +880,14 @@ function resetToBuiltin() {
       S.builtin  = JSON.parse(JSON.stringify(data));
       saveToStorage(S.services);
       render(); renderManager();
-      showToast(`Przywrócono ${data.length} serwisów z pliku`,'ok');
-      updateStorageStatus(`✅ Przywrócono z pliku — ${data.length} serwisów`);
+      showToast(`Restored ${data.length} services z pliku`,'ok');
+      updateStorageStatus(`✅ Restored z pliku — ${data.length} services`);
     })
     .catch(() => {
       S.services = []; S.builtin = [];
       render(); renderManager();
-      showToast('Nie można załadować services.json — zaimportuj ręcznie','err');
-      updateStorageStatus('⚠ Brak danych — zaimportuj services.json');
+      showToast('Could not load services.json — import manually','err');
+      updateStorageStatus('⚠ None danych — zaimportuj services.json');
     });
 }
 
@@ -911,10 +911,10 @@ dz.addEventListener('drop', e => {
       saveToStorage(S.services);
       render();
       renderManager();
-      showToast(`Załadowano i zapamiętano ${data.length} serwisów`,'ok');
-      updateStorageStatus(`💾 Załadowano z importu — ${data.length} serwisów`);
+      showToast(`Loaded and saved ${data.length} services`,'ok');
+      updateStorageStatus(`💾 Loaded from import — ${data.length} services`);
     } catch(err) {
-      showToast('Błąd parsowania JSON: '+err.message,'err');
+      showToast('JSON parse error: '+err.message,'err');
     }
   };
   reader.readAsText(file);
@@ -948,7 +948,7 @@ function genCompose() {
 
 function genEnv() {
   const sv = selSvcs();
-  let o = `# .env — zmienne środowiskowe dla docker-compose\n# Wypełnij przed uruchomieniem: docker-compose up -d\n\n`;
+  let o = `# .env — environment variables for docker-compose\n# Fill in before running: docker-compose up -d\n\n`;
   const envMap = {
     pihole:      `PIHOLE_PASSWORD=zmien_mnie\n`,
     wireguard:   `WG_HOST=twoj.publiczny.ip\nWG_PASSWORD=zmien_mnie\n`,
@@ -965,7 +965,7 @@ function genEnv() {
   };
   let hasEnv = false;
   sv.forEach(s => { if (envMap[s.id]) { o += envMap[s.id]; hasEnv = true; } });
-  if (!hasEnv) o += `# Brak wymaganych zmiennych dla wybranych serwisów.\n`;
+  if (!hasEnv) o += `# None wymaganych zmiennych dla wybranych services.\n`;
   return o;
 }
 
@@ -973,15 +973,15 @@ function genReadme() {
   const sv = selSvcs();
   const ram = totalRam(), disk = totalDisk();
   let o = `# RPi Homelab — konfiguracja\n\nWygenerowano przez RPi Homelab Configurator.\n\n`;
-  o += `## Zainstalowane serwisy\n\n| Serwis | Licencja | Komercyjne | Port | RAM |\n|--------|----------|------------|------|-----|\n`;
+  o += `## Zainstalowane serwisy\n\n| Serwis | License | Komercyjne | Port | RAM |\n|--------|----------|------------|------|-----|\n`;
   sv.forEach(s => {
     const comm = s.commercial===true?'✅':s.commercial===false?'⛔':'?';
     const licMd = s.licenseUrl?`[${s.license||'?'}](${s.licenseUrl})`:(s.license||'?');
     o += `| ${s.emoji||''} **${s.name}** | ${licMd} | ${comm} | ${s.port||'—'} | ~${s.ram} MB |\n`;
   });
   o += `| 🐳 **System + Docker** | — | — | — | ~300 MB |\n`;
-  o += `| **ŁĄCZNIE** | | | | **~${ram} MB** |\n\n`;
-  o += `## Wymagania\n\n- RAM: ~${ram} MB (${ram>2048?'RPi 4 4GB lub RPi 5':ram>900?'RPi 4 2GB+':'RPi 3+'})\n- Dysk: ~${disk} GB\n\n`;
+  o += `| **TOTAL** | | | | **~${ram} MB** |\n\n`;
+  o += `## Requirements\n\n- RAM: ~${ram} MB (${ram>2048?'RPi 4 4GB lub RPi 5':ram>900?'RPi 4 2GB+':'RPi 3+'})\n- Dysk: ~${disk} GB\n\n`;
   o += `## Uruchomienie\n\n\`\`\`bash\ncp .env.example .env\nnano .env\ndocker-compose up -d\ndocker-compose ps\n\`\`\`\n\n`;
   o += `## Adresy (lokalnie)\n\n`;
   sv.forEach(s => {
@@ -1004,7 +1004,7 @@ function openModal() {
   GEN['.env.example']       = genEnv();
   GEN['README.md']          = genReadme();
   document.getElementById('modal-sub').textContent =
-    `${sv.length} serwisów · ~${totalRam()} MB RAM · ~${totalDisk()} GB dysku`;
+    `${sv.length} services · ~${totalRam()} MB RAM · ~${totalDisk()} GB dysku`;
   const tabs = Object.keys(GEN);
   document.getElementById('modal-tabs').innerHTML =
     tabs.map((n,i)=>`<button class="ftab${i===0?' active':''}" onclick="switchTab('${n}',this)">${n}</button>`).join('');
